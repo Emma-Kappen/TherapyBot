@@ -1,0 +1,32 @@
+// File: backend/llm.jsw
+import { getSecret } from 'wix-secrets-backend';
+
+export async function callGeminiLLM(prompt) {
+  try {
+    // Retrieve your API key securely
+    const apiKey = await getSecret("geminiAPIKey");
+    
+    // Define your Gemini LLM endpoint URL
+    const url = "https://your-gemini-llm-endpoint.com/api";
+    
+    // Make the API call with the retrieved API key
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({ prompt })
+    });
+    
+    if (!response.ok) {
+      throw new Error("LLM request failed");
+    }
+    
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error in callGeminiLLM:", error);
+    throw error;
+  }
+}

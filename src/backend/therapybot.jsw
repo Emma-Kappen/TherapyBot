@@ -1,0 +1,53 @@
+// backend/therapybot.jsw
+import { getSecret } from 'wix-secrets-backend';
+
+/**
+ * Processes a text prompt by sending it to the Gemini LLM and returns the text response.
+ * @param {string} prompt - The text input obtained from the client-side speech-to-text.
+ * @returns {Promise<Object>} An object containing either the LLM response or an error message.
+ */
+export async function processVoiceInput(prompt) {
+  try {
+    // Retrieve your Gemini API key from Secrets Manager
+    const apiKey = await getSecret("geminiAPIKey");
+    
+    // Your Gemini LLM endpoint URL (replace with your actual endpoint)
+    const url = "https://your-gemini-llm-endpoint.com/api";
+    
+    // Prepare the payload for the Gemini API
+    const payload = {
+      prompt: prompt
+      // Add any additional parameters required by your LLM API here.
+    };
+
+    // Call Gemini LLM using fetch
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Gemini LLM request failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    // Assume that the Gemini LLM returns a JSON object with a field "response"
+    const llmResponseText = data.response;
+
+    return {
+      success: true,
+      response: llmResponseText
+    };
+
+  } catch (error) {
+    console.error("Error in processVoiceInput:", error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
